@@ -1,0 +1,135 @@
+{% extends "auction/base.html" %}
+{% block title %}Product List{% endblock %}
+{% block content %}
+
+<style>
+    .product-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .product-list li {
+        background: #f9f9f9;
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .product-list li:hover {
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .product-list a {
+        font-size: 18px;
+        font-weight: bold;
+        color: #007bff;
+        text-decoration: none;
+    }
+
+    .product-list a:hover {
+        text-decoration: underline;
+    }
+
+    .product-list small {
+        color: #666;
+    }
+
+    .empty-msg {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .user-bids {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f4f8ff;
+    border-radius: 10px;
+    border: 1px solid #dce6f0;
+}
+
+.user-bids h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #2a2a2a;
+}
+
+.won-products-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+
+.won-products-table th,
+.won-products-table td {
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+.won-products-table thead {
+    background-color: #e3efff;
+}
+
+.won-products-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.empty-note {
+    color: #666;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+</style>
+
+<h2>📦 Available Products for Bidding</h2>
+
+<ul class="product-list">
+    {% for product in products %}
+        {% if not product.assigned_to %}
+        <li>
+            <a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a><br>
+            <small>Ends on: {{ product.end_date|date:"Y-m-d H:i" }}</small>
+        </li>
+        {% endif %}
+    {% empty %}
+        <li class="empty-msg">No products available for bidding.</li>
+    {% endfor %}
+</ul>
+
+{% if user.is_authenticated %}
+    <div class="user-bids">
+        <h3>Won Products</h3>
+
+        {% if user_bids %}
+            <table class="won-products-table">
+                <thead>
+                    <tr>
+                        <th>Sl No</th>
+                        <th>Product</th>
+                        <th>Final Bid Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bid in user_bids %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ bid.product.name }}</td>
+                        <td>₹{{ bid.amount }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="empty-note">No products won yet.</p>
+        {% endif %}
+    </div>
+{% endif %}
+
+
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "auction/base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+
+<style>
+    .product-detail {
+        line-height: 1.6;
+    }
+
+    .product-detail h2 {
+        margin-bottom: 10px;
+        font-size: 26px;
+        color: #333;
+    }
+
+    .product-detail p {
+        margin-bottom: 8px;
+    }
+
+    .bid-info, .user-bids, .bid-form {
+        background: #f9f9f9;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-top: 20px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.05);
+    }
+
+    .bid-info strong {
+        font-weight: bold;
+    }
+
+    .bid-form h3, .user-bids h3 {
+        margin-bottom: 15px;
+        color: #444;
+    }
+
+    .bid-form input[type="text"],
+    .bid-form input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    table th, table td {
+        padding: 10px;
+        border: 1px solid #ccc;
+        text-align: left;
+    }
+
+    table th {
+        background-color: #f1f1f1;
+    }
+
+    .note {
+        font-style: italic;
+        color: #777;
+        margin-top: 20px;
+    }
+
+    .error {
+        color: red;
+        font-weight: bold;
+        margin-top: 15px;
+    }
+</style>
+
+<div class="product-detail">
+    <h2>{{ product.name }}</h2>
+    <p>{{ product.description }}</p>
+    <p><strong>Start:</strong> {{ product.start_date|date:"Y-m-d H:i" }}</p>
+    <p><strong>End:</strong> {{ product.end_date|date:"Y-m-d H:i" }}</p>
+
+    {% if user.is_authenticated %}
+        <div class="user-bids">
+            <h3>Your Bids</h3>
+            {% if user_bids %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Amount (₹)</th>
+                            <th>Bid Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bid in user_bids %}
+                        <tr>
+                            <td>₹{{ bid.amount }}</td>
+                            <td>{{ bid.timestamp|date:"Y-m-d H:i:s" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p style="font-style: italic; color: #777;">You have not placed any bids yet.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="bid-info">
+        {% if highest_bid %}
+            <p><strong>Highest Bid:</strong> ₹{{ highest_bid.amount }} by {{ highest_bid.user.username }}</p>
+        {% else %}
+            <p>No bids placed yet.</p>
+        {% endif %}
+    </div>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        {% if product.is_active %}
+            <div class="bid-form">
+                <h3>Place a Bid</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn">Submit Bid</button>
+                </form>
+            </div>
+        {% else %}
+            <p class="error">Bidding has ended for this product.</p>
+        {% endif %}
+    {% else %}
+        <p class="note">Please <a href="{% url 'login' %}">login</a> to place a bid.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

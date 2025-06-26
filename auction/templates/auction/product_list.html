@@ -91,12 +91,10 @@
 
 <ul class="product-list">
     {% for product in products %}
-        {% if not product.assigned_to %}
         <li>
             <a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a><br>
             <small>Ends on: {{ product.end_date|date:"Y-m-d H:i" }}</small>
         </li>
-        {% endif %}
     {% empty %}
         <li class="empty-msg">No products available for bidding.</li>
     {% endfor %}
@@ -119,8 +117,8 @@
                     {% for bid in user_bids %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ bid.product.name }}</td>
-                        <td>₹{{ bid.amount }}</td>
+                        <td>{{ bid.product__name }}</td>
+                        <td>₹{{ bid.max_amount }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

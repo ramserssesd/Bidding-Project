@@ -10,10 +10,6 @@ class Product(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='won_products')
 
-    def is_active(self):
-        now = timezone.now()
-        return self.start_date <= now <= self.end_date
-
     def __str__(self):
         return self.name
 

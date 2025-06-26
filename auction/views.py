@@ -6,22 +6,23 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils import timezone
 from .models import Bid
-from django.db.models import Subquery, OuterRef
+from django.db.models import Max
 
 @login_required
 def product_list(request):
-    products = Product.objects.all()
+    products = Product.objects.filter(assigned_to=None)
     now = timezone.now()
     
+    #This code assign to user starts
     for product in products:
         if product.end_date < now and product.assigned_to is None:
             highest_bid = product.bids.order_by('-amount').first()
             if highest_bid:
                 product.assigned_to = highest_bid.user
                 product.save()
+    #ends
    
-    max_bid_subquery = Bid.objects.filter(product=OuterRef('product')).order_by('-amount').values('amount')[:1]
-    user_bids = Bid.objects.filter(user=request.user, product__assigned_to=request.user,amount=Subquery(max_bid_subquery))
+    user_bids =  Bid.objects.filter(user=request.user, product__assigned_to=request.user).values('product__name').annotate(max_amount=Max('amount'))
     return render(request, 'auction/product_list.html', {'products': products,'user_bids':user_bids})
 
 @login_required
@@ -30,9 +31,6 @@ def product_detail(request, pk):
     form = BidForm()
     user_bids = product.bids.filter(user=request.user) if request.user.is_authenticated else None
     if request.method == 'POST':
-        if not product.is_active():
-            return render(request, 'auction/product_detail.html', {'product': product, 'form': form,'error': 'Bidding time is over!'})
-
         form = BidForm(request.POST)
         if form.is_valid():
             bid = form.save(commit=False)
@@ -41,12 +39,8 @@ def product_detail(request, pk):
             bid.save()
             return redirect('product_detail', pk=pk)
 
-    return render(request, 'auction/product_detail.html', {
-        'product': product,
-        'form': form,
-        'highest_bid': product.bids.first(),
-        'user_bids':user_bids,
-    })
+    return render(request, 'auction/product_detail.html', {'product': product,'form': form,'highest_bid': product.bids.first(),
+        'user_bids':user_bids,})
 
 def user_login(request):
     if request.user.is_authenticated:

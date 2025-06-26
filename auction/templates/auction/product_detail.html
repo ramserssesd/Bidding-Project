@@ -117,18 +117,14 @@
     {% endif %}
 
     {% if user.is_authenticated %}
-        {% if product.is_active %}
-            <div class="bid-form">
-                <h3>Place a Bid</h3>
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn">Submit Bid</button>
-                </form>
-            </div>
-        {% else %}
-            <p class="error">Bidding has ended for this product.</p>
-        {% endif %}
+        <div class="bid-form">
+            <h3>Place a Bid</h3>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn">Submit Bid</button>
+            </form>
+        </div>
     {% else %}
         <p class="note">Please <a href="{% url 'login' %}">login</a> to place a bid.</p>
     {% endif %}
